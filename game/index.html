@@ -1,0 +1,228 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+        "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+    <title></title>
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7/jquery.min.js"></script>
+
+    <script src="assets/js/libs/dancerjs/dancer.js"></script>
+    <script src="assets/js/libs/dancerjs/support.js"></script>
+    <script src="assets/js/libs/dancerjs/beat.js"></script>
+    <script src="assets/js/libs/dancerjs/adapterWebkit.js"></script>
+    <script src="assets/js/libs/dancerjs/adapterMoz.js"></script>
+    <script src="assets/js/libs/dancerjs/adapterFlash.js"></script>
+
+    <script src="assets/js/libs/dancerjs/lib/fft.js"></script>
+    <script src="assets/js/libs/dancerjs/lib/flash_detect.js"></script>
+    <script src="assets/js/libs/dancerjs/plugins/dancer.fft.js"></script>
+    <script src="assets/js/libs/dancerjs/plugins/dancer.waveform.js"></script>
+
+     <script src="assets/js/libs/jDataView.js"></script>
+    
+
+
+    <script src="assets/js/libs/crafty.js"></script>
+    <script src="assets/js/core/sprites.js"></script>
+    <script src="assets/js/core/armas.js"></script>
+    <script src="assets/js/core/inimigos.js"></script>
+    <script src="assets/js/core/jogador.js"></script>
+
+    <script>
+        window.URL = window.URL || window.webkitURL;
+    </script>
+
+</head>
+<body>
+    <span id="hp_atual">100</span>/<span id="hp_maximo">100</span>---------Score:<span id="score"></span>
+    <div id="titulo"></div>
+    <div id="artista"></div>
+    <div id="album"></div>
+    <div id="ano"></div>
+    <input type="file" id="arquivo" /> <br />
+
+
+    <script>
+        /*
+            Dancer.setOptions({
+                flashJS: "lib/soundmanager2.js",
+                flashSWF:"lib/soundmanager2.swf"
+            });
+
+            $(document).ready(function(){
+                $("#arquivo").bind("change", function(evento){
+                    var files = this.files;
+                    var file = files[0];
+                    var audio = window.webkitURL.createObjectURL(file);
+                    var dancer = new Dancer(audio);
+
+                    beat = dancer.createBeat({
+                        onBeat: function(mag){
+                            Crafty.e("Inimigo");
+                        },
+                        offBeat: function(mag){
+                            console.log("No Beat");
+                        }
+                    });
+                    beat.on();
+                    dancer.play();
+
+               /*     var reader = new FileReader();
+
+
+                        reader.onload = (function(theFile) {
+                            return function(e) {
+                             //   console.log(e);
+
+                                var dv = new jDataView(e.target.result);
+
+                                // "TAG" starts at byte -128 from EOF.
+                                // See http://en.wikipedia.org/wiki/ID3
+                                if (dv.getString(3, dv.byteLength - 128) == 'TAG') {
+                                  var title = dv.getString(30, dv.tell());
+                                  var artist = dv.getString(30, dv.tell());
+                                  var album = dv.getString(30, dv.tell());
+                                  var year = dv.getString(4, dv.tell());
+
+                                    $("#prompt").html("" + title + "-" + artist + "-" + album);
+
+                                } else {
+                                  // no ID3v1 data found.
+                                }
+
+                            };
+                        })(file);
+
+                    reader.readAsArrayBuffer(file); 
+
+
+      //      beat.on();
+//
+       //     dancer.play();
+
+                });
+            });
+*/
+
+
+        </script>
+
+    <script>
+        var controler;
+        var dancer;
+        var jogador;
+
+        Crafty.c("Controller", {
+            init: function(){
+                this.requires("2D");
+                var respaw = function(frame){
+                    if (frame.frame % 50 == 0) {
+                        Crafty.e("Inimigo");
+                    }
+                };
+                this.bind("EnterFrame", function(frame){
+                //    respaw(frame);
+                    $("#hp_atual").text(jogador.hp.atual);
+                    $("#score").text(jogador.score);
+                });
+            }
+        });
+
+        Crafty.scene("Demo", function(){
+            jogador = Crafty.e("Jogador");
+            Crafty.e("2D, DOM, Text").attr({ x: 250, y: 50 }).text("Fase 1").textColor('#FFFFFF');
+
+            controler = Crafty.e("Controller");
+        });
+
+        Crafty.scene("GameOver", function(){
+            Crafty.e("2D, DOM, Text").attr({ x: 100, y: 100 }).text("Look at me!!").textColor('#FFFFFF');
+            dancer.stop();
+        });
+
+
+        Dancer.setOptions({
+                flashJS: "assets/js/libs/dancerjs/lib/soundmanager2.js",
+                flashSWF:"assets/js/libs/dancerjs/lib/soundmanager2.swf"
+            });
+
+        $(document).ready(function(){
+            $("#arquivo").bind("change", function(evento){
+                $("#arquivo").hide();
+                var files = this.files;
+                var file = files[0];
+                var audio = URL.createObjectURL(file);
+                dancer = new Dancer(audio, {
+                    codecs: ["mp3"]
+                });
+
+                beat = dancer.createBeat({
+                    onBeat: function(mag){
+                        Crafty.e("Inimigo");
+                        console.log(mag);
+                    },
+                    offBeat: function(mag){
+                        console.log(mag);
+                    }
+                });
+                beat.on();
+                dancer.play();
+                Crafty.init(480, 320);
+                Crafty.background("rgb(0,0,100)");
+                Crafty.scene("Demo");
+                Crafty.bind("GameOver", function(){
+             //       controler.destroy();
+                    Crafty.scene("GameOver");
+                });
+
+                var reader = new FileReader();
+
+
+                    reader.onload = (function(theFile) {
+                        return function(e) {
+                         //   console.log(e);
+
+                            var dv = new jDataView(e.target.result);
+
+                            // "TAG" starts at byte -128 from EOF.
+                            // See http://en.wikipedia.org/wiki/ID3
+                            if (dv.getString(3, dv.byteLength - 128) == 'TAG') {
+                              var title = dv.getString(30, dv.tell());
+                              var artist = dv.getString(30, dv.tell());
+                              var album = dv.getString(30, dv.tell());
+                              var year = dv.getString(4, dv.tell());
+
+                                $("#titulo").text(title);
+                                $("#artista").text(artist);
+                                $("#album").text(album);
+                                $("#ano").text(year);
+
+                            } else {
+                              // no ID3v1 data found.
+                            }
+
+                        };
+                    })(file);
+
+                reader.readAsArrayBuffer(file); 
+
+
+  //      beat.on();
+//
+   //     dancer.play();
+
+            });
+        });
+
+     /*   (function(){
+            Crafty.init(480, 320);
+            Crafty.background("rgb(0,0,100)");
+            Crafty.scene("Demo");
+            Crafty.bind("GameOver", function(){
+         //       controler.destroy();
+                Crafty.scene("GameOver");
+            });
+        })(); */
+
+    </script>
+</body>
+</html>
